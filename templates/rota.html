@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Mapa e Rota até Posto de Saúde</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background: #f0f4f8;
+        }
+        h2 {
+            color: #1e40af;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 500px;
+        }
+        #map {
+            height: 500px;
+            border: 2px solid #1e40af;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Mapa dos Postos de Saúde e Rota</h2>
+
+<!-- Campo para endereço e botão para traçar rota -->
+<input type="text" id="endereco" placeholder="Digite seu endereço aqui" />
+<button onclick="buscarRota()">Mostrar Rota até Posto Mais Próximo</button>
+
+<!-- Div do mapa -->
+<div id="map"></div>
+
+<script>
+    // Inicializa mapa centrado em Fortaleza
+    let map = L.map('map').setView([-3.7319, -38.5267], 12);
+
+    // Camada base
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Adiciona marcadores dos postos (dados enviados do backend)
+    const postos = {{ postos|tojson }};
+
+    for (const esp in postos) {
+        postos[esp].forEach(posto => {
+            const lat = posto.latitude;
+            const lon = posto.longitude;
+            if (lat && lon) {
+                const popup = `<b>${posto.nome}</b><br>${posto.endereco}<br><i>Especialidade:</i> ${esp.charAt(0).toUpperCase() + esp.slice(1)}`;
+                L.marker([lat, lon], {icon: L.icon({iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [25, 41], iconAnchor: [12, 41]})})
+                    .bindPopup(popup)
+                    .addTo(map);
+            }
+        });
+    }
+
+    let rotaLayer = null;
+    let marcadorOrigem = null;
+    let marcadorDestino = null;
+
+    async function buscarRota() {
+        const endereco = document.getElementById('endereco').value;
+        if (!endereco) {
+            alert("Digite um endereço válido.");
+            return;
+        }
+
+        try {
+            const response = await axios.post('/rota', { endereco: endereco });
+            const dados = response.data;
+
+            const origem = dados.origem;
+            const destino = dados.destino;
+            const coordenadas = dados.coordenadas;
+
+            // Centraliza no ponto de origem
+            map.setView([origem[0], origem[1]], 14);
+
+            // Remove rota anterior e marcadores
+            if (rotaLayer) {
+                map.removeLayer(rotaLayer);
+                rotaLayer = null;
+            }
+            if (marcadorOrigem) {
+                map.removeLayer(marcadorOrigem);
+                marcadorOrigem = null;
+            }
+            if (marcadorDestino) {
+                map.removeLayer(marcadorDestino);
+                marcadorDestino = null;
+            }
+
+            // Desenha rota
+            rotaLayer = L.polyline(coordenadas, { color: 'blue', weight: 5 }).addTo(map);
+
+            // Marcadores origem e destino
+            marcadorOrigem = L.marker(origem).addTo(map).bindPopup("Você está aqui").openPopup();
+            marcadorDestino = L.marker(destino).addTo(map).bindPopup("Posto mais próximo");
+
+        } catch (error) {
+            alert("Erro ao calcular rota. Verifique o endereço.");
+            console.error(error);
+        }
+    }
+</script>
+
+</body>
+</html>

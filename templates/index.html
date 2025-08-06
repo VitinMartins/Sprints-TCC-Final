@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Diagnóstico e Mapa de Postos</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e3a8a;
+        }
+
+        form {
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button[type="submit"] {
+            background-color: #1e40af;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #1d4ed8;
+        }
+
+        #resultados {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+
+        #resultados ul {
+            padding-left: 20px;
+        }
+
+        #mapa {
+            max-width: 800px;
+            height: 400px;
+            margin: 0 auto;
+            border: 2px solid #1e3a8a;
+            border-radius: 10px;
+        }
+
+        .posto-button {
+            margin: 5px 5px 15px 0;
+            padding: 8px 12px;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .posto-button:hover {
+            background-color: #059669;
+        }
+
+        li {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        strong {
+            color: #1e40af;
+        }
+
+        em {
+            color: #1e40af;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>--PreviMed--</h1>
+    <form id="form">
+        <label for="sintomas">Digite seus sintomas (separados por vírgula):</label><br />
+        <input type="text" id="sintomas" name="sintomas" placeholder="Ex: dor de cabeça, tosse, etc." required />
+        <button type="submit">Prever</button>
+
+        <label for="endereco_usuario">Seu endereço:</label>
+<input type="text" id="endereco_usuario" placeholder="Ex: Rua João Pessoa, 123, Fortaleza - CE" />
+
+<label for="posto_destino">Escolha um posto:</label>
+<select id="posto_destino">
+    {% for esp, postos in postos.items() %}
+        {% for p in postos %}
+            <option value="{{ p['latitude'] }},{{ p['longitude'] }},{{ p['nome'] }},{{ p['endereco'] }}">{{ p['nome'] }} ({{ esp.capitalize() }})</option>
+        {% endfor %}
+    {% endfor %}
+</select>
+
+<button type="button" onclick="mostrarRota()">Mostrar Rota</button>
+    </form>
+
+    <div id="resultados"></div>
+    <div id="mapa"></div>
+
+    <script>
+        var mapaLeaflet = L.map('mapa').setView([-3.7319, -38.5267], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(mapaLeaflet);
+        var marcador = L.marker([-3.7319, -38.5267]).addTo(mapaLeaflet)
+            .bindPopup('Fortaleza - CE').openPopup();
+
+        var postosPorEspecialidade = {{ postos | tojson }};
+
+        async function buscarCoordenadas(endereco) {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}`;
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Accept-Language': 'pt-BR' },
+                    method: 'GET'
+                });
+                if (!response.ok) return null;
+                const dados = await response.json();
+                if (dados.length === 0) return null;
+                return {
+                    lat: parseFloat(dados[0].lat),
+                    lon: parseFloat(dados[0].lon)
+                };
+            } catch {
+                return null;
+            }
+        }
+
+        function atualizarMapa(lat, lon, nome, endereco) {
+            mapaLeaflet.setView([lat, lon], 16);
+            marcador.setLatLng([lat, lon])
+                .bindPopup(`<b>${nome}</b><br>${endereco}`)
+                .openPopup();
+        }
+
+        async function mostrarPostos(especialidade) {
+            especialidade = especialidade.toLowerCase();
+            const postos = postosPorEspecialidade[especialidade];
+            const resultadosDiv = document.getElementById('resultados');
+
+            if (!postos || postos.length === 0) {
+                resultadosDiv.innerHTML = `<p>Nenhum posto cadastrado para a especialidade: <em>${especialidade}</em>.</p>`;
+                return;
+            }
+
+            resultadosDiv.innerHTML = `<h3>Postos para a especialidade: <em>${especialidade}</em></h3>`;
+
+            for (let i = 0; i < postos.length; i++) {
+                const p = postos[i];
+                const coord = await buscarCoordenadas(p.endereco);
+                let btnHtml = '';
+
+                if (coord) {
+                    btnHtml = `<button class="posto-button" onclick="atualizarMapa(${coord.lat}, ${coord.lon}, '${p.nome}', '${p.endereco}')">${p.nome}</button>`;
+                } else {
+                    btnHtml = `<span style="color: red;">${p.nome} (Endereço não encontrado no mapa)</span>`;
+                }
+
+                resultadosDiv.innerHTML += `<div>${btnHtml}</div>`;
+            }
+        }
+
+        function mostrarResultados(dados) {
+            const resultadosDiv = document.getElementById('resultados');
+            if (dados.length === 0) {
+                resultadosDiv.innerHTML = '<p>Nenhuma doença encontrada para esses sintomas.</p>';
+                return;
+            }
+
+            let html = '<h2>Resultados</h2><ul>';
+            dados.forEach(item => {
+                html += `<li>
+                    <strong>Doença:</strong> ${item.doenca}<br>
+                    <strong>Descrição:</strong> ${item.descricao}<br>
+                    <strong>Tratamento:</strong> ${item.tratamento}<br>
+                    <strong>Compatibilidade:</strong> ${item.percentual}%
+                    <br><button class="posto-button" onclick="mostrarPostos('${item.doenca}')">Ver Postos</button>
+                </li>`;
+            });
+            html += '</ul>';
+            resultadosDiv.innerHTML = html;
+        }
+
+        document.getElementById('form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const input = document.getElementById('sintomas').value;
+            const sintomas = input.split(',').map(s => s.trim());
+
+            try {
+                const response = await fetch('/buscar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sintomas })
+                });
+
+                if (!response.ok) throw new Error('Erro ao buscar doenças.');
+                const dados = await response.json();
+                mostrarResultados(dados);
+            } catch (err) {
+                alert('Erro na requisição: ' + err.message);
+            }
+        });
+    </script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<script>
+let rotaLayer = null;
+let marcadorOrigem = null;
+let marcadorDestino = null;
+
+async function mostrarRota() {
+    const endereco = document.getElementById('endereco_usuario').value;
+    const select = document.getElementById('posto_destino');
+    const [lat, lon] = select.value.split(',');
+
+    if (!endereco || !lat || !lon) {
+        alert("Digite o endereço e escolha o posto.");
+        return;
+    }
+
+    const coordenadasOrigem = await buscarCoordenadas(endereco);
+    if (!coordenadasOrigem) {
+        alert("Endereço não encontrado.");
+        return;
+    }
+
+    try {
+        const resposta = await fetch('/rota', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ origem: endereco, destino: `${lat},${lon}` })
+        });
+
+        const dados = await resposta.json();
+
+        if (!dados.rota) {
+            alert("Erro ao obter rota.");
+            return;
+        }
+
+        // Remove rota e marcadores anteriores
+        if (rotaLayer) {
+            mapaLeaflet.removeLayer(rotaLayer);
+        }
+        if (marcadorOrigem) {
+            mapaLeaflet.removeLayer(marcadorOrigem);
+        }
+        if (marcadorDestino) {
+            mapaLeaflet.removeLayer(marcadorDestino);
+        }
+
+        // Criando a linha da rota
+        rotaLayer = L.polyline(dados.rota, {
+            color: 'blue', // Cor da rota
+            weight: 5,
+            opacity: 0.8
+        }).addTo(mapaLeaflet);
+
+        // Adicionando marcadores nos pontos
+        marcadorOrigem = L.marker([coordenadasOrigem.lat, coordenadasOrigem.lon]).addTo(mapaLeaflet);
+        marcadorDestino = L.marker([parseFloat(lat), parseFloat(lon)]).addTo(mapaLeaflet);
+
+    } catch (error) {
+        console.error("Erro ao buscar rota:", error);
+        alert("Erro ao traçar rota.");
+    }
+}
+
+
+</script>
+</body>
+</html>
