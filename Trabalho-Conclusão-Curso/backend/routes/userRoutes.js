@@ -36,4 +36,19 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Atualizar usuário
+router.put("/:id", async (req, res) => {
+  try {
+    const { nome, email, senha } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { nome, email, senha },
+      { new: true }
+    );
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao atualizar usuário" });
+  }
+});
+
 export default router;

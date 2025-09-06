@@ -6,7 +6,7 @@ export default function CentroSaude() {
 
   return (
     <div>
-      <h2>Postos de Saúde Sugeridos</h2>
+      <h2 className="form-container">Postos de Saúde Sugeridos</h2>
       <ul>
         {centers.map((c, i) => (
           <li key={i}>{c.name} - {c.specialty} - {c.address}</li>

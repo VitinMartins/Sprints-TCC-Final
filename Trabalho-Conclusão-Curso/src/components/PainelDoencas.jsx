@@ -8,7 +8,7 @@ export default function PainelDoencas() {
 
   return (
     <div>
-      <h2>Resultados</h2>
+      <h2 className="form-container">Resultados</h2>
       <ul>
         {diseases.map((d, i) => (
           <li key={i}>{d.name} - {d.probability}</li>
