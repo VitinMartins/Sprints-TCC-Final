@@ -1,5 +1,4 @@
 export default function PainelDoencas() {
-  // Mock de dados por enquanto
   const diseases = [
     { name: "Diabetes", probability: "70%" },
     { name: "Anemia", probability: "20%" },
@@ -7,11 +6,13 @@ export default function PainelDoencas() {
   ];
 
   return (
-    <div>
-      <h2 className="form-container">Resultados</h2>
+    <div className="form-container fadeInUp">
+      <h2>Resultados</h2>
       <ul>
         {diseases.map((d, i) => (
-          <li key={i}>{d.name} - {d.probability}</li>
+          <li key={i}>
+            <strong>{d.name}</strong> — Probabilidade: {d.probability}
+          </li>
         ))}
       </ul>
     </div>

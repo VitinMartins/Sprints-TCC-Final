@@ -9,6 +9,8 @@ export default function Perfil({ user, setUser }) {
   });
 
   const [errors, setErrors] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,10 +56,12 @@ export default function Perfil({ user, setUser }) {
       const updatedUser = await response.json();
       setUser(updatedUser);
       localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
-      alert("Perfil atualizado com sucesso!");
+      setSuccessMessage("Perfil atualizado com sucesso!");
+      setErrorMessage("");
     } catch (error) {
       console.error(error);
-      alert("Falha ao atualizar perfil.");
+      setErrorMessage("Falha ao atualizar perfil.");
+      setSuccessMessage("");
     }
   };
 
@@ -73,17 +77,22 @@ export default function Perfil({ user, setUser }) {
 
       localStorage.removeItem("loggedInUser");
       setUser(null);
-      alert("Conta excluída com sucesso!");
-      navigate("/cadastro");
+      setSuccessMessage("Conta excluída com sucesso!");
+      setErrorMessage("");
+      setTimeout(() => navigate("/cadastro"), 1500);
     } catch (error) {
       console.error(error);
-      alert("Falha ao excluir conta.");
+      setErrorMessage("Falha ao excluir conta.");
+      setSuccessMessage("");
     }
   };
 
   return (
-    <div className="form-container">
+    <div className="form-container fadeIn">
       <h1>Perfil do Usuário</h1>
+
+      {errorMessage && <div className="error-box fadeIn">{errorMessage}</div>}
+      {successMessage && <div className="success-box fadeIn">{successMessage}</div>}
 
       <div className="perfil-grid">
         <div className="perfil-field">
@@ -120,12 +129,9 @@ export default function Perfil({ user, setUser }) {
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+      <div className="btn-group">
         <button onClick={handleSave}>Salvar Alterações</button>
-        <button
-          onClick={handleDelete}
-          style={{ backgroundColor: "#ef4444" }}
-        >
+        <button className="delete-btn" onClick={handleDelete}>
           Excluir Conta
         </button>
       </div>

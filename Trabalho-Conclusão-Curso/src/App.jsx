@@ -33,13 +33,18 @@ function AppContent() {
     navigate("/login");
   };
 
+  const userIsLogged = !!user;
+
   return (
     <>
-      <nav className="navbar">
-        <Link to="/">Home</Link> | <Link to="/rota">Rota</Link> |{" "}
-        {!user ? (
+      <nav className="navbar fadeIn">
+        <Link to="/">Home</Link>
+        <Link to="/rota">Rota</Link>
+
+        {!userIsLogged ? (
           <>
-            <Link to="/login">Login</Link> | <Link to="/cadastro">Cadastro</Link>
+            <Link to="/login">Login</Link>
+            <Link to="/cadastro">Cadastro</Link>
           </>
         ) : (
           <div className="dropdown" ref={dropdownRef}>
@@ -71,7 +76,7 @@ function AppContent() {
         <Route path="/rota" element={<Rota />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/cadastro" element={<Cadastro />} />
-        <Route path="/perfil" element={<Perfil user={user} setUser={setUser} />} />
+        <Route path="/perfil" element={userIsLogged ? <Perfil user={user} setUser={setUser} /> : <Cadastro />} />
       </Routes>
     </>
   );

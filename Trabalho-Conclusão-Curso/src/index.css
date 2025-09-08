@@ -1,133 +1,208 @@
+/* === RESET & BASE === */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f0f4f8;
+  background: #e6f2f8;
   margin: 0;
   padding: 20px;
+  color: #333;
+  transition: background 0.3s ease;
 }
 
-h1 {
+h1, h2 {
   text-align: center;
-  color: #1e3a8a;
+  color: #0f4c81;
+  margin-bottom: 20px;
 }
 
+/* === FORMULÁRIOS === */
 form {
   max-width: 800px;
   margin: 0 auto 30px auto;
-  padding: 20px;
+  padding: 25px;
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: fadeIn 0.6s ease;
 }
 
 label {
-  font-weight: bold;
+  font-weight: 600;
   display: block;
   margin-top: 15px;
+  color: #0f4c81;
 }
 
-input[type="text"], select {
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select {
   width: 100%;
   padding: 12px;
   margin: 10px 0;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid #ccc;
-  box-sizing: border-box;
   font-size: 16px;
+  transition: border-color 0.3s;
 }
 
+input:focus,
+select:focus {
+  border-color: #0f4c81;
+  outline: none;
+}
+
+/* === BOTÕES === */
 button {
-  background-color: #1e40af;
+  background-color: #2e7d32;
   color: white;
   padding: 10px 20px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s;
-  margin-top: 10px;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 button:hover {
-  background-color: #1d4ed8;
+  background-color: #1b5e20;
+  transform: scale(1.03);
 }
 
+/* === RESULTADOS === */
 #resultados {
   max-width: 800px;
   margin: 0 auto 20px auto;
   padding: 20px;
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  animation: fadeInUp 0.6s ease;
 }
 
 #resultados ul {
   padding-left: 20px;
 }
 
-#mapa {
-  max-width: 800px;
-  height: 400px;
-  margin: 0 auto;
-  border: 2px solid #1e3a8a;
-  border-radius: 10px;
-}
-
 li {
   margin-bottom: 15px;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 17px;
 }
 
 strong {
-  color: #1e40af;
+  color: #0f4c81;
 }
 
+/* === MAPA === */
+#mapa {
+  max-width: 800px;
+  height: 400px;
+  margin: 30px auto;
+  border: 2px solid #0f4c81;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
 
+.success-box {
+  background-color: #e6f4ea;
+  color: #2e7d32;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  animation: fadeIn 0.4s ease;
+}
+
+.error-box {
+  background-color: #fdecea;
+  color: #e53935;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  animation: fadeIn 0.4s ease;
+}
+
+/* === CONTAINERS === */
 .form-container {
   max-width: 400px;
   margin: 50px auto;
-  padding: 20px;
+  padding: 25px;
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-/* Navbar */
-.navbar {
-  margin-bottom: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: fadeIn 0.6s ease;
 }
 
-/* Dropdown */
+.rota-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* === NAVBAR REFINADA === */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 24px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  margin-bottom: 30px;
+}
+
+/* Links da navbar */
+.navbar a {
+  text-decoration: none;
+  color: #0f4c81;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.navbar a:hover {
+  background-color: #dbe9f4;
+}
+
+/* === DROPDOWN REFINADO === */
 .dropdown {
   position: relative;
   display: inline-block;
 }
 
 .dropdown-btn {
-  background-color: #1e40af;
+  background-color: #0f4c81;
   color: white;
-  padding: 5px 10px;
-  border-radius: 6px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
 }
 
 .dropdown-btn:hover {
-  background-color: #1d4ed8;
+  background-color: #145a9e;
 }
 
 .dropdown-menu {
   position: absolute;
-  top: 35px;
+  top: 45px;
   right: 0;
   background: black;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  min-width: 150px;
+  min-width: 160px;
   opacity: 0;
   transform: translateY(-10px);
   pointer-events: none;
@@ -144,12 +219,13 @@ strong {
 .dropdown-menu button {
   display: block;
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: none;
   background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: background 0.2s;
+  font-weight: 500;
+  transition: background 0.2s ease;
 }
 
 .dropdown-menu button:hover {
@@ -157,14 +233,33 @@ strong {
 }
 
 .dropdown-menu .delete-btn {
-  color: #ef4444;
+  color: #e57373;
 }
 
 .dropdown-menu .delete-btn:hover {
-  background: #fee2e2;
+  background: #fdecea;
 }
 
-/* Responsivo */
+/* === ERROS === */
+.error-text {
+  color: #e57373;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+
+/* === ANIMAÇÕES === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === RESPONSIVO === */
 @media (max-width: 500px) {
   .navbar {
     flex-direction: column;
