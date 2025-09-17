@@ -1,13 +1,11 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-export default function Home() {
+const FormularioEstiloVida = ({ userId }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("loggedInUser"));
-  const userId = user?._id;
 
   const [formData, setFormData] = useState({
     idade: '',
@@ -24,15 +22,6 @@ export default function Home() {
   });
 
   const [alert, setAlert] = useState({ type: '', message: '' });
-
-  const calcularIMC = () => {
-    const alturaMetros = parseFloat(formData.altura) / 100;
-    const peso = parseFloat(formData.peso);
-    if (!isNaN(alturaMetros) && !isNaN(peso) && alturaMetros > 0) {
-      return (peso / (alturaMetros * alturaMetros)).toFixed(2);
-    }
-    return null;
-  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -51,16 +40,22 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/pacientes/estiloVida", {
-        userId,
-        ...formData
-      });
+      await axios.post('/api/pacientes/estiloVida', { userId, ...formData });
       setAlert({ type: 'success', message: t('sucesso') });
       setTimeout(() => navigate('/sintomas'), 1500);
     } catch (error) {
       console.error(error);
       setAlert({ type: 'error', message: t('erro') });
     }
+  };
+
+  const calcularIMC = () => {
+    const alturaMetros = parseFloat(formData.altura) / 100;
+    const peso = parseFloat(formData.peso);
+    if (!isNaN(alturaMetros) && !isNaN(peso) && alturaMetros > 0) {
+      return (peso / (alturaMetros * alturaMetros)).toFixed(2);
+    }
+    return null;
   };
 
   return (
@@ -167,4 +162,6 @@ export default function Home() {
       <button type="submit">{t('salvar')}</button>
     </form>
   );
-}
+};
+
+export default FormularioEstiloVida;

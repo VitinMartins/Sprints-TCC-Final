@@ -1,10 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import Home from "./pages/Home";
-import Rota from "./pages/Rota";
+import Sintomas from "./pages/Sintomas"; 
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
 import Perfil from "./pages/Perfil";
+import TrocaLinguagem from "./components/TrocaLinguagem";
+import Historico from "./pages/Historico"; // importar o Historico
 
 function AppContent() {
   const [user, setUser] = useState(null);
@@ -39,7 +41,9 @@ function AppContent() {
     <>
       <nav className="navbar fadeIn">
         <Link to="/">Home</Link>
-        <Link to="/rota">Rota</Link>
+        <Link to="/sintomas">Sintomas</Link>
+
+        <TrocaLinguagem />
 
         {!userIsLogged ? (
           <>
@@ -63,6 +67,14 @@ function AppContent() {
               >
                 Editar Perfil
               </button>
+              <button
+                onClick={() => {
+                  navigate("/historico"); // novo botão para histórico
+                  setDropdownOpen(false);
+                }}
+              >
+                Histórico
+              </button>
               <button className="delete-btn" onClick={handleLogout}>
                 Logout
               </button>
@@ -73,10 +85,11 @@ function AppContent() {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/rota" element={<Rota />} />
+        <Route path="/sintomas" element={<Sintomas />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/cadastro" element={<Cadastro />} />
-        <Route path="/perfil" element={userIsLogged ? <Perfil user={user} setUser={setUser} /> : <Cadastro />} />
+        <Route path="/perfil" element={userIsLogged ? <Perfil user={user} /> : <Cadastro />} />
+        <Route path="/historico" element={<Historico />} />
       </Routes>
     </>
   );

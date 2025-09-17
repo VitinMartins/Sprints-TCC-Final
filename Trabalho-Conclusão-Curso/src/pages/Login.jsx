@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function Login({ setUser }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,7 +22,7 @@ export default function Login({ setUser }) {
       const data = await response.json();
 
       if (!response.ok) {
-        setErrorMessage(data.message || "Email ou senha incorretos!");
+        setErrorMessage(data.message || t("emailSenhaIncorretos"));
         return;
       }
 
@@ -30,31 +32,31 @@ export default function Login({ setUser }) {
       navigate("/");
     } catch (error) {
       console.error("Erro no login:", error);
-      setErrorMessage("Erro ao conectar com o servidor");
+      setErrorMessage(t("erroConectarServidor"));
     }
   };
 
   return (
     <div className="form-container fadeIn">
-      <h2>Login</h2>
+      <h2>{t("login")}</h2>
       <form onSubmit={handleLogin}>
         {errorMessage && <div className="error-box fadeIn">{errorMessage}</div>}
 
-        <label>Email:</label>
+        <label>{t("email")}:</label>
         <input
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
         />
-        <label>Senha:</label>
+        <label>{t("senha")}:</label>
         <input
           type="password"
           value={senha}
           onChange={e => setSenha(e.target.value)}
           required
         />
-        <button type="submit">Entrar</button>
+        <button type="submit">{t("entrar")}</button>
       </form>
     </div>
   );

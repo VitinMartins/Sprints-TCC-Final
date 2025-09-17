@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function Cadastro() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -22,51 +24,51 @@ export default function Cadastro() {
       const data = await response.json();
 
       if (!response.ok) {
-        setErrorMessage(data.message || "Erro no cadastro!");
+        setErrorMessage(data.message || t("erroCadastro"));
         setSuccessMessage("");
         return;
       }
 
-      setSuccessMessage(data.message || "Cadastro realizado com sucesso!");
+      setSuccessMessage(data.message || t("sucessoCadastro"));
       setErrorMessage("");
       setNome(""); setEmail(""); setSenha("");
       setTimeout(() => navigate("/login"), 1500); // Redireciona após 1.5s
     } catch (error) {
       console.error("Erro no cadastro:", error);
-      setErrorMessage("Erro ao conectar com o servidor");
+      setErrorMessage(t("erroServidor"));
       setSuccessMessage("");
     }
   };
 
   return (
     <div className="form-container fadeIn">
-      <h2>Cadastro</h2>
+      <h2>{t("cadastro")}</h2>
       <form onSubmit={handleCadastro}>
         {errorMessage && <div className="error-box fadeIn">{errorMessage}</div>}
         {successMessage && <div className="success-box fadeIn">{successMessage}</div>}
 
-        <label>Nome:</label>
+        <label>{t("nome")}:</label>
         <input
           type="text"
           value={nome}
           onChange={e => setNome(e.target.value)}
           required
         />
-        <label>Email:</label>
+        <label>{t("email")}:</label>
         <input
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
         />
-        <label>Senha:</label>
+        <label>{t("senha")}:</label>
         <input
           type="password"
           value={senha}
           onChange={e => setSenha(e.target.value)}
           required
         />
-        <button type="submit">Cadastrar</button>
+        <button type="submit">{t("cadastrar")}</button>
       </form>
     </div>
   );

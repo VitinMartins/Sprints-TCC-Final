@@ -12,6 +12,7 @@ h1, h2 {
   text-align: center;
   color: #0f4c81;
   margin-bottom: 20px;
+  font-weight: 700;
 }
 
 /* === FORMULÁRIOS === */
@@ -19,10 +20,15 @@ form {
   max-width: 800px;
   margin: 0 auto 30px auto;
   padding: 25px;
-  background: white;
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
   animation: fadeIn 0.6s ease;
+  transition: box-shadow 0.3s ease;
+}
+
+form:hover {
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 label {
@@ -42,13 +48,14 @@ select {
   border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 16px;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 input:focus,
 select:focus {
   border-color: #0f4c81;
   outline: none;
+  box-shadow: 0 0 5px rgba(15,76,129,0.4);
 }
 
 /* === BOTÕES === */
@@ -60,22 +67,49 @@ button {
   border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 button:hover {
   background-color: #1b5e20;
-  transform: scale(1.03);
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
 }
 
-/* === RESULTADOS === */
+/* === ALERTS MODERNOS === */
+.success-box, .error-box {
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fadeIn 0.4s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.success-box {
+  background-color: #e6f4ea;
+  color: #2e7d32;
+  border-left: 5px solid #2e7d32;
+}
+
+.error-box {
+  background-color: #fdecea;
+  color: #e53935;
+  border-left: 5px solid #e53935;
+}
+
+/* === RESULTADOS & LISTAS === */
 #resultados {
   max-width: 800px;
   margin: 0 auto 20px auto;
   padding: 20px;
-  background: white;
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
   animation: fadeInUp 0.6s ease;
 }
 
@@ -101,52 +135,26 @@ strong {
   border: 2px solid #0f4c81;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.success-box {
-  background-color: #e6f4ea;
-  color: #2e7d32;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  font-weight: 500;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  animation: fadeIn 0.4s ease;
-}
-
-.error-box {
-  background-color: #fdecea;
-  color: #e53935;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  font-weight: 500;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  animation: fadeIn 0.4s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 /* === CONTAINERS === */
-.form-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 25px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  animation: fadeIn 0.6s ease;
-}
-
+.form-container,
 .rota-container {
-  max-width: 600px;
-  margin: 40px auto;
-  padding: 20px;
-  background: white;
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  padding: 25px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  animation: fadeIn 0.6s ease;
+  transition: box-shadow 0.3s ease;
 }
 
-/* === NAVBAR REFINADA === */
+.form-container:hover,
+.rota-container:hover {
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* === NAVBAR MODERNA === */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -155,22 +163,27 @@ strong {
   padding: 12px 24px;
   background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   margin-bottom: 30px;
+  transition: box-shadow 0.3s ease;
 }
 
-/* Links da navbar */
+.navbar:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
 .navbar a {
   text-decoration: none;
   color: #0f4c81;
   font-weight: 600;
   padding: 8px 14px;
   border-radius: 6px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s;
 }
 
 .navbar a:hover {
   background-color: #dbe9f4;
+  transform: scale(1.05);
 }
 
 /* === DROPDOWN REFINADO === */
@@ -187,11 +200,12 @@ strong {
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s;
 }
 
 .dropdown-btn:hover {
   background-color: #145a9e;
+  transform: scale(1.03);
 }
 
 .dropdown-menu {
@@ -201,7 +215,7 @@ strong {
   background: black;
   border: 1px solid #ccc;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
   min-width: 160px;
   opacity: 0;
   transform: translateY(-10px);
@@ -225,15 +239,16 @@ strong {
   text-align: left;
   cursor: pointer;
   font-weight: 500;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s;
 }
 
 .dropdown-menu button:hover {
   background: #f0f0f0;
+  transform: scale(1.02);
 }
 
 .dropdown-menu .delete-btn {
-  color: #e57373;
+  color: #e53935;
 }
 
 .dropdown-menu .delete-btn:hover {
@@ -242,11 +257,11 @@ strong {
 
 /* === ERROS === */
 .error-text {
-  color: #e57373;
+  color: #e53935;
   font-size: 14px;
   margin-top: 5px;
+  font-weight: 500;
 }
-
 
 /* === ANIMAÇÕES === */
 @keyframes fadeIn {
@@ -265,4 +280,28 @@ strong {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+.language-switcher {
+  display: flex;
+  gap: 8px;
+}
+
+.language-switcher button {
+  background-color: #0f4c81;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.language-switcher button:hover {
+  background-color: #0f4c81;
+}
+
+.language-switcher button.active {
+  background-color: #0f4c81;
+  color: white;
 }

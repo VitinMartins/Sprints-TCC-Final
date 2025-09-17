@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useTranslation } from "react-i18next";
 
 export default function Perfil({ user, setUser }) {
+  const { t } = useTranslation();
+
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
     senha: "",
   });
 
+  const [dadosPaciente, setDadosPaciente] = useState(null);
   const [errors, setErrors] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -16,21 +21,30 @@ export default function Perfil({ user, setUser }) {
   useEffect(() => {
     if (user) {
       setFormData({ nome: user.nome, email: user.email, senha: user.senha });
+      buscarDadosPaciente(user._id);
     }
   }, [user]);
 
+  const buscarDadosPaciente = async (userId) => {
+    try {
+      const res = await axios.get(`/api/paciente/${userId}`);
+      setDadosPaciente(res.data);
+    } catch (err) {
+      console.error(err);
+      setErrorMessage(t("erroCarregarDadosMedicos"));
+    }
+  };
+
   const validate = () => {
     const newErrors = {};
-    if (!formData.nome.trim()) newErrors.nome = "Nome é obrigatório.";
+    if (!formData.nome.trim()) newErrors.nome = t("nomeObrigatorio");
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email.trim()) newErrors.email = "Email é obrigatório.";
-    else if (!emailRegex.test(formData.email))
-      newErrors.email = "Email inválido.";
+    if (!formData.email.trim()) newErrors.email = t("emailObrigatorio");
+    else if (!emailRegex.test(formData.email)) newErrors.email = t("emailInvalido");
 
-    if (!formData.senha) newErrors.senha = "Senha é obrigatória.";
-    else if (formData.senha.length < 6)
-      newErrors.senha = "Senha deve ter pelo menos 6 caracteres.";
+    if (!formData.senha) newErrors.senha = t("senhaObrigatoria");
+    else if (formData.senha.length < 6) newErrors.senha = t("senhaMin6");
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -56,17 +70,17 @@ export default function Perfil({ user, setUser }) {
       const updatedUser = await response.json();
       setUser(updatedUser);
       localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
-      setSuccessMessage("Perfil atualizado com sucesso!");
+      setSuccessMessage(t("perfilAtualizado"));
       setErrorMessage("");
     } catch (error) {
       console.error(error);
-      setErrorMessage("Falha ao atualizar perfil.");
+      setErrorMessage(t("falhaAtualizarPerfil"));
       setSuccessMessage("");
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Tem certeza que deseja excluir sua conta?")) return;
+    if (!window.confirm(t("confirmExcluirConta"))) return;
 
     try {
       const response = await fetch(`http://localhost:5000/api/users/${user._id}`, {
@@ -77,62 +91,57 @@ export default function Perfil({ user, setUser }) {
 
       localStorage.removeItem("loggedInUser");
       setUser(null);
-      setSuccessMessage("Conta excluída com sucesso!");
+      setSuccessMessage(t("contaExcluida"));
       setErrorMessage("");
       setTimeout(() => navigate("/cadastro"), 1500);
     } catch (error) {
       console.error(error);
-      setErrorMessage("Falha ao excluir conta.");
+      setErrorMessage(t("falhaExcluirConta"));
       setSuccessMessage("");
     }
   };
 
+  const calcularIMC = () => {
+    const alturaMetros = parseFloat(dadosPaciente?.altura) / 100;
+    const peso = parseFloat(dadosPaciente?.peso);
+    if (!isNaN(alturaMetros) && !isNaN(peso) && alturaMetros > 0) {
+      const imc = peso / (alturaMetros * alturaMetros);
+      return imc.toFixed(2);
+    }
+    return null;
+  };
+
   return (
     <div className="form-container fadeIn">
-      <h1>Perfil do Usuário</h1>
+      <h1>{t("perfilUsuario")}</h1>
 
       {errorMessage && <div className="error-box fadeIn">{errorMessage}</div>}
       {successMessage && <div className="success-box fadeIn">{successMessage}</div>}
 
       <div className="perfil-grid">
         <div className="perfil-field">
-          <label>Nome:</label>
-          <input
-            type="text"
-            name="nome"
-            value={formData.nome}
-            onChange={handleChange}
-          />
+          <label>{t("nome")}:</label>
+          <input type="text" name="nome" value={formData.nome} onChange={handleChange} />
           {errors.nome && <span className="error-text">{errors.nome}</span>}
         </div>
 
         <div className="perfil-field">
-          <label>Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
+          <label>{t("email")}:</label>
+          <input type="email" name="email" value={formData.email} onChange={handleChange} />
           {errors.email && <span className="error-text">{errors.email}</span>}
         </div>
 
         <div className="perfil-field">
-          <label>Senha:</label>
-          <input
-            type="password"
-            name="senha"
-            value={formData.senha}
-            onChange={handleChange}
-          />
+          <label>{t("senha")}:</label>
+          <input type="password" name="senha" value={formData.senha} onChange={handleChange} />
           {errors.senha && <span className="error-text">{errors.senha}</span>}
         </div>
       </div>
 
       <div className="btn-group">
-        <button onClick={handleSave}>Salvar Alterações</button>
+        <button onClick={handleSave}>{t("salvarAlteracoes")}</button>
         <button className="delete-btn" onClick={handleDelete}>
-          Excluir Conta
+          {t("excluirConta")}
         </button>
       </div>
     </div>
