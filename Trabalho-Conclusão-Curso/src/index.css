@@ -1,3 +1,4 @@
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
 /* === RESET & BASE === */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -7,6 +8,7 @@ body {
   color: #333;
   transition: background 0.3s ease;
 }
+
 
 h1, h2 {
   text-align: center;
@@ -304,4 +306,97 @@ strong {
 .language-switcher button.active {
   background-color: #0f4c81;
   color: white;
+}
+
+.form-sintomas {
+  display: grid;
+  gap: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.sintoma-item {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.sintoma-item label {
+  grid-column: 1 / -1;
+  font-weight: 600;
+}
+
+.sintoma-item input,
+.sintoma-item select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.mapa-section {
+  margin-top: 24px;
+  display: grid;
+  gap: 12px;
+}
+
+.mapa-form {
+  display: grid;
+  grid-template-columns: 2fr 2fr auto;
+  gap: 12px;
+}
+
+.mapa-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-secondary {
+  background: #64748b;
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.error-box {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.map-wrapper {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Responsivo */
+@media (max-width: 700px) {
+  .sintoma-item { grid-template-columns: 1fr; }
+  .mapa-form { grid-template-columns: 1fr; }
 }

@@ -1,12 +1,15 @@
+// src/components/FormularioSintomasDetalhado.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import MapaSection from './MapaSection'; // import do componente separado
 
 const FormularioSintomasDetalhado = () => {
   const { t } = useTranslation();
   const [sintomas, setSintomas] = useState([{ nome: '', duracao: '', intensidade: '' }]);
   const [alert, setAlert] = useState({ type: '', message: '' });
+  const [showMapa, setShowMapa] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (index, field, value) => {
@@ -16,7 +19,11 @@ const FormularioSintomasDetalhado = () => {
   };
 
   const adicionarSintoma = () => setSintomas([...sintomas, { nome: '', duracao: '', intensidade: '' }]);
-  const handlePrever = () => setAlert({ type: 'success', message: t('prever') });
+
+  const handlePrever = () => {
+    setAlert({ type: 'success', message: t('prever') });
+    setShowMapa(true);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,7 +50,7 @@ const FormularioSintomasDetalhado = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="form-sintomas">
       <h2>{t('sintomas')}</h2>
 
       {alert.message && (
@@ -53,7 +60,7 @@ const FormularioSintomasDetalhado = () => {
       )}
 
       {sintomas.map((sintoma, index) => (
-        <div key={index}>
+        <div key={index} className="sintoma-item">
           <label>{t('sintomas')}</label>
           <input
             type="text"
@@ -80,9 +87,13 @@ const FormularioSintomasDetalhado = () => {
         </div>
       ))}
 
-      <button type="button" onClick={adicionarSintoma}>{t('adicionar')}</button>
-      <button type="submit">{t('salvar')}</button>
-      <button type="button" onClick={handlePrever}>{t('prever')}</button>
+      <div className="buttons">
+        <button type="button" onClick={adicionarSintoma}>{t('adicionar')}</button>
+        <button type="submit">{t('salvar')}</button>
+        <button type="button" onClick={handlePrever}>{t('prever')}</button>
+      </div>
+
+      {showMapa && <MapaSection />}
     </form>
   );
 };
