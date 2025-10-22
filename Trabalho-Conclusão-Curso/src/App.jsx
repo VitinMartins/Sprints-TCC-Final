@@ -88,7 +88,7 @@ function AppContent() {
         <Route path="/sintomas" element={<Sintomas />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/cadastro" element={<Cadastro />} />
-        <Route path="/perfil" element={userIsLogged ? <Perfil user={user} /> : <Cadastro />} />
+        <Route path="/perfil" element={userIsLogged ? <Perfil user={user} setUser={setUser} /> : <Cadastro />} />
         <Route path="/historico" element={<Historico />} />
       </Routes>
     </>
