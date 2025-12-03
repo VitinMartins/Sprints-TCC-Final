@@ -3,13 +3,50 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import MapaSection from './MapaSection'; // import do componente separado
+import MapaSection from './MapaSection';
 
-const DOENCAS_CRONICAS = [
-  { nome: 'Hipertensão', sintomas: ['dor de cabeça', 'tontura', 'visão turva'], idadeMin: 35 },
-  { nome: 'Diabetes', sintomas: ['sede excessiva', 'urinar muito', 'fome constante'], idadeMin: 30 },
-  { nome: 'Asma', sintomas: ['falta de ar', 'chiado no peito', 'tosse'], idadeMin: 0 },
-  { nome: 'Cardiopatia', sintomas: ['cansaço', 'dor no peito', 'palpitação'], idadeMin: 40 },
+// NOVO — Doenças com regras aprimoradas
+const DOENCAS = [
+  {
+    nome: 'Hipertensão',
+    especialidade: 'Cardiologia',
+    sintomas: ['dor de cabeça', 'tontura', 'visão turva', 'cansaço'],
+    idadeMin: 35,
+    fatores: {
+      historico: ['hipertensão', 'pressão alta'],
+      imcMin: 27
+    }
+  },
+  {
+    nome: 'Diabetes',
+    especialidade: 'Endocrinologia',
+    sintomas: ['sede excessiva', 'urinar muito', 'fome constante', 'cansaço'],
+    idadeMin: 30,
+    fatores: {
+      historico: ['diabetes', 'glicemia'],
+      imcMin: 28
+    }
+  },
+  {
+    nome: 'Asma',
+    especialidade: 'Pneumologia',
+    sintomas: ['falta de ar', 'chiado no peito', 'tosse'],
+    idadeMin: 0,
+    fatores: {
+      historico: ['asma', 'bronquite'],
+      imcMin: 0
+    }
+  },
+  {
+    nome: 'Cardiopatia',
+    especialidade: 'Cardiologia',
+    sintomas: ['cansaço', 'dor no peito', 'palpitação', 'falta de ar'],
+    idadeMin: 40,
+    fatores: {
+      historico: ['coração', 'cardiopatia'],
+      imcMin: 26
+    }
+  }
 ];
 
 const INTENSIDADE_PONTOS = {
@@ -32,27 +69,51 @@ const FormularioSintomasDetalhado = () => {
     setSintomas(novosSintomas);
   };
 
-  const adicionarSintoma = () => setSintomas([...sintomas, { nome: '', duracao: '', intensidade: '' }]);
+  const adicionarSintoma = () =>
+    setSintomas([...sintomas, { nome: '', duracao: '', intensidade: '' }]);
 
+  // 🔥 NOVA FUNÇÃO — cálculo de risco avançado
   const calcularDoenca = (paciente) => {
-    const { idade, sintomas } = paciente;
-    if (!sintomas || sintomas.length === 0) return null;
+    if (!paciente) return null;
 
-    const scores = DOENCAS_CRONICAS.map((d) => {
+    const { idade, altura, peso, historicoFamiliar, sintomas } = paciente;
+
+    const imc = peso && altura ? peso / ((altura / 100) ** 2) : 0;
+
+    const scores = DOENCAS.map((d) => {
       let score = 0;
-      d.sintomas.forEach((sintomaEsperado) => {
-        sintomas.forEach((s) => {
-          if (s.nome.toLowerCase().includes(sintomaEsperado.toLowerCase())) {
+
+      // 1) Sintomas compatíveis
+      sintomas?.forEach((s) => {
+        d.sintomas.forEach((esperado) => {
+          if (s.nome.toLowerCase().includes(esperado)) {
             score += INTENSIDADE_PONTOS[s.intensidade] || 1;
           }
         });
       });
+
+      // 2) Idade mínima
       if (idade >= d.idadeMin) score += 1;
-      return { doenca: d.nome, score };
+
+      // 3) IMC elevado relacionado à doença
+      if (imc >= d.fatores.imcMin && d.fatores.imcMin > 0) score += 1;
+
+      // 4) Histórico familiar
+      historicoFamiliar?.forEach((h) => {
+        d.fatores.historico.forEach((match) => {
+          if (h.toLowerCase().includes(match.toLowerCase())) score += 2;
+        });
+      });
+
+      return {
+        doenca: d.nome,
+        especialidade: d.especialidade,
+        score
+      };
     });
 
     scores.sort((a, b) => b.score - a.score);
-    return scores[0].score > 0 ? scores[0].doenca : null;
+    return scores[0].score > 0 ? scores[0] : null;
   };
 
   const handlePrever = async () => {
@@ -66,35 +127,35 @@ const FormularioSintomasDetalhado = () => {
     }
 
     try {
-      // Buscar dados completos do paciente (informações + sintomas)
-      const response = await axios.get(`http://localhost:5000/api/pacientes/perfil/${user._id}`);
-      const paciente = response.data.paciente;
+      const response = await axios.get(
+        `http://localhost:5000/api/pacientes/perfil/${user._id}`
+      );
 
+      const paciente = response.data.paciente;
       if (!paciente) {
         setAlert({ type: 'error', message: 'Paciente sem dados salvos.' });
         return;
       }
 
-      // Combina sintomas digitados + sintomas do banco (prioriza digitados)
-      const sintomasCompletos = sintomas.filter(s => s.nome) ;
-      if (sintomasCompletos.length === 0 && paciente.sintomas) {
-        sintomasCompletos.push(...paciente.sintomas);
-      }
+      // Mistura sintomas digitados com os existentes no banco
+      const sintomasDigitados = sintomas.filter((s) => s.nome);
+      paciente.sintomas =
+        sintomasDigitados.length > 0 ? sintomasDigitados : paciente.sintomas;
 
-      paciente.sintomas = sintomasCompletos;
+      // 🔥 DETECÇÃO FINAL
+      const resultado = calcularDoenca(paciente);
 
-      // Calcula doença mais provável
-      const doenca = calcularDoenca(paciente);
-      if (doenca) {
-        setDoencaPrevista(doenca);
-        setAlert({ type: 'success', message: `Doença mais provável: ${doenca}` });
+      if (resultado) {
+        setDoencaPrevista(resultado);
+        setAlert({
+          type: 'success',
+          message: `Possível doença: ${resultado.doenca} (Especialidade: ${resultado.especialidade})`
+        });
       } else {
-        setAlert({ type: 'info', message: 'Não foi possível prever uma doença com base nos sintomas.' });
+        setAlert({ type: 'info', message: 'Não foi possível prever uma doença.' });
       }
 
-      // Exibe mapa somente depois da previsão
       setShowMapa(true);
-
     } catch (error) {
       console.error(error);
       setAlert({ type: 'error', message: 'Erro ao buscar dados do paciente.' });
@@ -103,19 +164,24 @@ const FormularioSintomasDetalhado = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+
     if (!user?._id) {
       setAlert({ type: 'error', message: t('usuarioNaoLogado') });
       return;
     }
+
     try {
-      const response = await axios.post("http://localhost:5000/api/pacientes/sintomas", {
-        userId: user._id,
-        sintomas,
-      });
+      const response = await axios.post(
+        'http://localhost:5000/api/pacientes/sintomas',
+        {
+          userId: user._id,
+          sintomas
+        }
+      );
+
       if (response.status === 200) {
         setAlert({ type: 'success', message: t('sucesso') });
-        setTimeout(() => 1500);
       } else {
         setAlert({ type: 'error', message: t('erro') });
       }
@@ -130,7 +196,15 @@ const FormularioSintomasDetalhado = () => {
       <h2>{t('sintomas')}</h2>
 
       {alert.message && (
-        <div className={alert.type === 'success' ? 'success-box' : alert.type === 'error' ? 'error-box' : 'info-box'}>
+        <div
+          className={
+            alert.type === 'success'
+              ? 'success-box'
+              : alert.type === 'error'
+              ? 'error-box'
+              : 'info-box'
+          }
+        >
           {alert.message}
         </div>
       )}
@@ -154,7 +228,12 @@ const FormularioSintomasDetalhado = () => {
           />
 
           <label>{t('intensidade')}</label>
-          <select value={sintoma.intensidade} onChange={(e) => handleChange(index, 'intensidade', e.target.value)}>
+          <select
+            value={sintoma.intensidade}
+            onChange={(e) =>
+              handleChange(index, 'intensidade', e.target.value)
+            }
+          >
             <option value="">{t('intensidade')}</option>
             <option value="leve">{t('leve')}</option>
             <option value="moderada">{t('moderada')}</option>
@@ -164,12 +243,19 @@ const FormularioSintomasDetalhado = () => {
       ))}
 
       <div className="buttons">
-        <button type="button" onClick={adicionarSintoma}>{t('adicionar')}</button>
+        <button type="button" onClick={adicionarSintoma}>
+          {t('adicionar')}
+        </button>
         <button type="submit">{t('salvar')}</button>
-        <button type="button" onClick={handlePrever}>{t('prever')}</button>
+        <button type="button" onClick={handlePrever}>
+          {t('prever')}
+        </button>
       </div>
 
-      {showMapa && <MapaSection />}
+      {/* Agora o mapa recebe a doença prevista */}
+      {showMapa && doencaPrevista && (
+        <MapaSection doencaPrevista={doencaPrevista} />
+      )}
     </form>
   );
 };

@@ -81,7 +81,6 @@ export default function Home() {
         <option value="">{t('sexo')}</option>
         <option value="masculino">{t('masculino')}</option>
         <option value="feminino">{t('feminino')}</option>
-        <option value="outro">{t('outro')}</option>
       </select>
 
       <label>{t('altura')}</label>
@@ -93,7 +92,7 @@ export default function Home() {
 
       <label>{t('historicoFamiliar')}</label>
       <div>
-        {['Diabetes', 'Hipertensão', 'Câncer', 'Cardiopatias'].map((doenca) => (
+        {['Diabetes', 'Hipertensão', 'bronquite', 'Cardiopatias'].map((doenca) => (
           <label key={doenca}>
             <input
               type="checkbox"
